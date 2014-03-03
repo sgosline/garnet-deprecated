@@ -1,8 +1,11 @@
 ==================================================================
-The GARNET package is a tool designed to collect TF-DNA predictions from
-clustered position weight matrices using chromatin-accessibility data. 
+The GARNET package 
+==================================================================
+A tool designed to collect TF-DNA predictions from clustered position weight matrices using chromatin-accessibility data. 
 ==================================================================
 Contact: Sara JC Gosline [sgosline@mit.edu]
+
+
 Copyright (c) 2014 Sara JC Gosline
 
 
@@ -19,10 +22,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ==================================================================
 System Requirements:
-1-
-2-
-3-
+==================================================================
+1-Python 2.6.5 or higher: http://www.python.org
+2-NetworkX (if using network option)
+3-Python packages: numpy, scipy,matplotlib
 
 ==================================================================
-Getting started:
-
+Getting significant transcription factors from expression data
+==================================================================
+1-Get expression data in a tab-delimited format (gene\tfold change)
+2-Collect chromatin accessibility data from related tissue/cell line as BED file
+3-Download FASTA format for bed regions from http://usegalaxy.org
+4-Enter all files into configuration file, run GARNET to determine transcription factors
