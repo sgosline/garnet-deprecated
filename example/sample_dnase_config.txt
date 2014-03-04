@@ -3,7 +3,7 @@
 bedfile=../../garnet/example/wgEncodeRegDnaseClusteredV2.bed
 genefile=../../garnet/data/ucsc_hg19_knownGenes.txt
 xreffile=../../garnet/data/ucsc_hg19_kgXref.txt
-fastafile=../..garnet/example/wgEncodeRegDnaseClusteredV2.fasta
+fastafile=../../garnet/example/wgEncodeRegDnaseClusteredV2.fasta
 windowsize=2000
 
 [motifData]

@@ -156,6 +156,9 @@ def main():
 
     if genefile is not None and bedfile is not None and xref is not None:
         outfile=mapGenesToRegions(genefile,xref,bedfile,window)
+    else:
+        print 'Missing genefile,bedfile or xref file, cannot map genes to regions.'
+        system.exit()
 
     tamofile=config.get('motifData','tamo_file')
     genome=config.get('motifData','genome')
@@ -172,8 +175,7 @@ def main():
             binding_out=motifScanning(tamofile,fastafile,numthreads,genome,outfile)
         else:
             binding_out=''
-            #print tamofile,fastafile
-            print 'No motif or fasta file to properly scan'
+            print 'Missing FASTA file or TAMO file - check your config file and try again.'
 
 
 

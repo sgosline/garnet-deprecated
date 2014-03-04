@@ -12,7 +12,7 @@ from collections import defaultdict
 import numpy as np
 from TAMO.seq import Fasta
 
-
+progdir=os.path.dirname(sys.argv[0])
 def build_annotated_tgm(closest_gene_output,distance_to_tss,logistic_score_output,fasta_file,motif_ids,makeWindow=True,tgm_file='',do_pkl=True):
     '''
     Takes existing tgm, and maps to gene names and TF ids within a specific window
@@ -171,6 +171,7 @@ def main():
     opts,args=parser.parse_args()
 
     if len(args)!=3:
+        print usage
         exit('Not enough arguments')
 
     logistic_score_output,closest_gene_output,fasta_file=args

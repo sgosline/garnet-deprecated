@@ -235,7 +235,7 @@ def main():
             if lpv>cpv:
                 regdict[tf]=lpv
     print 'Found '+str(len(regdict))+'Tf scores for '+str(len(new_results))+' motif results'
-    of=open('pcsf_input_'+outdir,'w')
+    of=open('FOREST_input_'+outdir,'w')
     for tf in regdict.keys():
         val=regdict[tf]
         of.write(tf+'\t'+str(val)+'\n')
