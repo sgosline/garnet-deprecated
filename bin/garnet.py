@@ -98,7 +98,7 @@ def createBindingMatrix(motif_binding_out,outfile,fastafile,tamo_file,use_unipro
         ##using regular gene names here
         map_cmd='python '+os.path.join(progdir,'get_window_binding_matrix.py')+' '+motif_binding_out+' '+outfile+' '+' '+fastafile+" --distance-to-gene='' --motif-id-list="+tfs+' --outfile='+matfile
 
-    pklfile=re.sub('.tgm','pkl',matfile)
+    pklfile=re.sub('.tgm','.pkl',matfile)
     if os.path.exists(pklfile):
         print 'File '+pklfile+' already exists, if you would like to replace delete and re-run'
         return pklfile
@@ -130,12 +130,19 @@ def getTfsFromRegression(pickle_file,expressionfile):
     return outdir
     
 def main():
+    
+    srcdir=os.path.join(progdir,'../src')
+    
     usage='Usage: %prog [configfilename]'
     parser=OptionParser(usage=usage)
     parser.add_option('--useUniprot',dest='useUniprot',action='store_true',help='Set this flag to use Uniprot identifies',default=False)
+    parser.add_option('--utilpath',dest='addpath',help='Destination of chipsequtil library, Default=%default',default=srcdir)
 
 
     opts,args=parser.parse_args()
+    
+    sys.path.insert(0,opts.addpath)
+    sys.path.insert(0,opts.addpath+'chipsequtil')
     
     if len(args)!=1:
         print 'Need a configuration file to provide experiment-level details'

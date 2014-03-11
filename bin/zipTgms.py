@@ -89,7 +89,7 @@ if __name__=='__main__':
             mat=resfile['matrix']
             tfs=resfile['tfs']
             geneids=resfile['genes']
-            tf_deliminter=resfile['delim']
+            tf_delimiter=resfile['delim']
             fname=re.sub('pkl','network.pkl',opts.pkl)
         else:
             print usage

@@ -200,6 +200,7 @@ progdir=os.path.dirname(sys.argv[0])
 
 def main():
     usage = "usage: %prog [opts] fasta_file"
+    srcdir=os.path.join(progdir,'../src')
 
     parser=OptionParser(usage)
     
@@ -209,6 +210,7 @@ def main():
     
     parser.add_option('--genefile',dest='gene_file',default='',help='File indicating which regions are mapped to genes, enabling the reduction of the FASTA file for gene-relevant regions')
     parser.add_option("--genome", dest="genome", default='mm9',help='The genome build that you are using, used to estimate binding site priors')
+    parser.add_option('--utilpath',dest='addpath',default=srcdir,help='Destination of chipsequtil library, Default=%default')
     parser.add_option("--outfile", dest="outfile")
 
 #    parser.add_option('--logistic',dest='logistic',action='store_true',default=False,help='Set to true to scale multiple matches into a logistic curve')
@@ -220,6 +222,9 @@ def main():
         
     fsa=args[0]
     motiffile=opts.motif
+    ##append path to chipsequtil/TAMO
+    sys.path.insert(0,opts.addpath)
+    sys.path.insert(0,opts.addpath+'chipsequtil')
     
     fsa_dict=Fasta.load(fsa,key_func=lambda x:x)
     if opts.gene_file!='':
