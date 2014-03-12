@@ -34,5 +34,5 @@ numthreads=4
 doNetwork=False
 
 [expressionData]
-expressionFile=../../garnet/examples/inv_egf_vs_untreated_lfc.txt
+expressionFile=../../examples/inv_egf_vs_untreated_lfc.txt
 

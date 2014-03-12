@@ -5,7 +5,7 @@ File to handle motif/expression regression
 __author__='Anthony Soltis'
 __email__='asoltis@mit.edu'
 
-import sys,os,pickle
+import sys,os,pickle,re
 from optparse import OptionParser
 import numpy as np
 from scipy import stats
@@ -93,7 +93,7 @@ def perform_regression(X,Y,motif_ids,norm):
 
         # Perform regression
         slope,intercept,r_val,p_val,std_err = stats.linregress(x,y)
-        reg_results.append(([motif_ids[i],slope,p_val]))
+        reg_results.append(([motif_ids[i],slope,p_val,i]))
 
         #fig = plt.figure()
         #ax1 = fig.add_subplot(111)
@@ -126,6 +126,9 @@ def main():
     description = ''
     parser = OptionParser(usage=usage,description=description)
 
+    ##get program directory
+    progdir=os.path.dirname(os.path.abspath(sys.argv[0]))
+    
     # Options
     parser.add_option('--outdir','--out',dest="outdir",default='./test_out.txt',
                       help='Choose output file name. Default is %default.')
@@ -138,6 +141,8 @@ def main():
     parser.add_option('--norm-type',dest='norm_type',default=None,
                       help='Choose normalization type for response data. Choices are: "log2", "log10".\
                             Default is %default.')    
+    parser.add_option('--gifdir',dest='motifs',default=os.path.join(progdir,'../data/matrix_files/gifs'),
+                      help='Directory containing motif GIFs to illustrate results. Default is %default')
 
     # get options, arguments
     (opts,args) = parser.parse_args()
@@ -207,23 +212,47 @@ def main():
     # FDR correction
     new_results = fdr_correction(reg_results)
 
+
     dn=os.path.dirname(outdir)
     if dn!='' and dn!='./' and not os.path.exists(dn):
         os.system('mkdir '+dn)
         
-    # Write to file
+    # Write to TEXT file
     of = open(outdir,'w')
     of.writelines('\t'.join(['Motif','Slope','p-val','q-val'])+'\n')
     for res in new_results:
-        ostr = '\t'.join([res[0],str(res[1]),str(res[2]),str(res[3])]) + '\n'
+        if str(res[1])=='nan':
+            continue    
+        ostr = '\t'.join([res[0],str(res[1]),str(res[2]),str(res[4])]) + '\n'
         of.writelines(ostr)
     of.close()
 
-    ##now write to Steiner-friendly input file
+    ##now create HTML writeup
+    of= open(re.sub(outdir.split('.')[-1],'html',outdir),'w')
+    of.writelines("""<html>
+                     <title>GARNET Results</title>
+                     <h3>GARNET regression results</h3> 
+                     <p>This table includes the results for GARNET TF-motif discovery and regression. This Table includes the non-zero results of the linear regression</p>
+                     <table width="90%">
+                      <tr><th style="width:25%">Motif Cluster</th><th style="width:12%">Slope</th><th style="width:12%">P-value</th><th style="width:12%">Q-value</th><th style="width:35%">LOGO</th></tr>
+                """)
+    for res in new_results:
+        if str(res[1])=='nan':
+            continue    
+        motifgif=os.path.join(opts.motifs,'motif'+str(res[3])+'.gif')
+        ostr = "<tr><td>"+' '.join(res[0].split('.'))+"</td><td>"+str(res[1])+'</td><td>'+str(res[2])+"</td><td>"+str(res[4])+"</td><td><img src=\""+motifgif+"\" scale=80%></td></tr>\n"
+        of.writelines(ostr)
+    of.writelines("</table></html>")
+    of.close()
+    
+    
+    ##now write to FOREST-friendly input file
     ##collect dictionary of all individual tf names and their regression p-values
     regdict={}
     for row in new_results:
         tfs=row[0].split(delim)
+        if str(row[1])=='nan':
+            continue    
         for tf in tfs:
             if row[2]==1:
                 continue

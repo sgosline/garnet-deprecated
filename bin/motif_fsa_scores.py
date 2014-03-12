@@ -9,8 +9,8 @@ __author__="Sara JC Gosline, Chris W Ng"
 __email__="sgosline@mit.edu"
 
 from optparse import OptionParser
-from TAMO import MotifTools
-from TAMO.seq import Fasta
+import chipsequtil.motiftools as MotifTools
+import chipsequtil.Fasta as Fasta
 import cPickle
 import numpy as np
 import math,sys
