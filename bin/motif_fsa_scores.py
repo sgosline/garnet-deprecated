@@ -9,8 +9,8 @@ __author__="Sara JC Gosline, Chris W Ng"
 __email__="sgosline@mit.edu"
 
 from optparse import OptionParser
-import chipsequtil.motiftools as MotifTools
-import chipsequtil.Fasta as Fasta
+
+#import chipsequtil.Fasta as Fasta
 import cPickle
 import numpy as np
 import math,sys
@@ -224,7 +224,11 @@ def main():
     motiffile=opts.motif
     ##append path to chipsequtil/TAMO
     sys.path.insert(0,opts.addpath)
-    sys.path.insert(0,opts.addpath+'chipsequtil')
+    global MotifTools
+    from chipsequtil import motiftools as MotifTools #import chipsequtil.motiftools as MotifTools
+    global Fasta
+    from chipsequtil import Fasta
+#    sys.path.insert(0,opts.addpath+'chipsequtil')
     
     fsa_dict=Fasta.load(fsa,key_func=lambda x:x)
     if opts.gene_file!='':

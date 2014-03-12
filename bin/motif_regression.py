@@ -141,6 +141,8 @@ def main():
     parser.add_option('--norm-type',dest='norm_type',default=None,
                       help='Choose normalization type for response data. Choices are: "log2", "log10".\
                             Default is %default.')    
+    parser.add_option('--use-qval',dest='use_qval',action='store_true',default=False,help='If set this the FOREST input file will contain -log(qval) instead of -log(pval). Default:%default')
+    parser.add_option('--qval-thresh',dest='thresh',type='string',default='0.1',help='Q-Value threshold to illustrate results. Default:%default')
     parser.add_option('--gifdir',dest='motifs',default=os.path.join(progdir,'../data/matrix_files/gifs'),
                       help='Directory containing motif GIFs to illustrate results. Default is %default')
 
@@ -217,7 +219,7 @@ def main():
     if dn!='' and dn!='./' and not os.path.exists(dn):
         os.system('mkdir '+dn)
         
-    # Write to TEXT file
+    # Write to TEXT file complete results
     of = open(outdir,'w')
     of.writelines('\t'.join(['Motif','Slope','p-val','q-val'])+'\n')
     for res in new_results:
@@ -239,9 +241,10 @@ def main():
     for res in new_results:
         if str(res[1])=='nan':
             continue    
-        motifgif=os.path.join(opts.motifs,'motif'+str(res[3])+'.gif')
-        ostr = "<tr><td>"+' '.join(res[0].split('.'))+"</td><td>"+str(res[1])+'</td><td>'+str(res[2])+"</td><td>"+str(res[4])+"</td><td><img src=\""+motifgif+"\" scale=80%></td></tr>\n"
-        of.writelines(ostr)
+        if res[4]<float(opts.thresh):
+            motifgif=os.path.join(opts.motifs,'motif'+str(res[3])+'.gif')
+            ostr = "<tr><td>"+' '.join(res[0].split('.'))+"</td><td>"+str(res[1])+'</td><td>'+str(res[2])+"</td><td>"+str(res[4])+"</td><td><img src=\""+motifgif+"\" scale=80%></td></tr>\n"
+            of.writelines(ostr)
     of.writelines("</table></html>")
     of.close()
     
@@ -253,10 +256,15 @@ def main():
         tfs=row[0].split(delim)
         if str(row[1])=='nan':
             continue    
+        if res[4]>float(opts.thresh):
+            continue
         for tf in tfs:
             if row[2]==1:
                 continue
-            lpv=-1.0*np.log2(float(row[2]))#calculate neg log pvalue
+            if opts.use_qval:
+                lpv=-1.0*np.log2(float(row[4]))#calculate neg log pvalue
+            else:
+                lpv=-1.0*np.log2(float(row[2]))#calculate neg log pvalue
             try:
                 cpv=regdict[tf]
             except KeyError:

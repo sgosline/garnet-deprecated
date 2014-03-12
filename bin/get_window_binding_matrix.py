@@ -10,14 +10,13 @@ import re,os,sys
 from optparse import OptionParser
 from collections import defaultdict
 import numpy as np
-from TAMO.seq import Fasta
 
 progdir=os.path.dirname(sys.argv[0])
 def build_annotated_tgm(closest_gene_output,distance_to_tss,logistic_score_output,fasta_file,motif_ids,makeWindow=True,tgm_file='',do_pkl=True):
     '''
     Takes existing tgm, and maps to gene names and TF ids within a specific window
     '''
-
+    from chipsequtil import Fasta
     ##get fasta file events, since these are columns in the logistic_score matrix
     seq_ids=Fasta.load(fasta_file)
 
@@ -164,7 +163,7 @@ def main():
     parser=OptionParser(usage=usage)
     parser.add_option('--distance-to-gene',dest='distance',type='string',default='10000',help='Max distance allowed between event and closest gene')
     parser.add_option('--motif-id-list',dest='motif_ids',type='string',default='',help='List of TF names that best map to each motif')
-    parser.add_option('--utilpath',default='../src/',dest='addpath',help='Destination of chipsequtil library')
+    parser.add_option('--utilpath',default=os.path.join(progdir,'../src/'),dest='addpath',help='Destination of chipsequtil library')
     parser.add_option('--outfile',default='',dest='outfile',help='Predefined output file, otherwise will create one automatically')
     parser.add_option('--noPkl',default=True,action='store_false',dest='do_pkl',help='Set this flag if outfile is not in pkl form')
 
@@ -178,8 +177,10 @@ def main():
 
     ##do the path management
     sys.path.insert(0,opts.addpath)
-    sys.path.insert(0,opts.addpath+'chipsequtil')
-    print opts.do_pkl
+    #sys.path.insert(0,opts.addpath+'chipsequtil')
+#    print sys.path
+#    print opts.do_pkl
+
     res=build_annotated_tgm(closest_gene_output,opts.distance,logistic_score_output,fasta_file,opts.motif_ids,tgm_file=opts.outfile,do_pkl=opts.do_pkl)
  
 
