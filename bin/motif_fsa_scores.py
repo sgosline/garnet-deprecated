@@ -88,6 +88,10 @@ def numbs(args):
     n_seqs=len(seqs)
     M,ID=Z
     thres,SUM,FP=PRF[ID]
+    ##if FP is 1, then that can throw things off...
+#    if FP==1.0:
+#        FP=min(SUM+0.05,0.95)
+#        print 'Ajusting FP from 1.0 to '+str(FP)
     ll = M.logP
 
     if genome in ['hg18','hg19']:
@@ -119,7 +123,7 @@ def numbs(args):
             seq_fwd = seq.upper()
             matches,endpoints,scores=AM.scan(seq_fwd,threshold=t)
             s=[(x-mi)/(ma-mi) for x in scores]
-            aff=affinity(s,SUM,FP,typ==typ)
+            aff=affinity(s,SUM,FP,typ)
             #num_bs=len(scores)
             S[0,j]=aff
         except: 
@@ -127,24 +131,31 @@ def numbs(args):
             #print 'score calc exception',
     return S
 
-def affinity(scores,SUM,FP,typ=1):
+def affinity(scores,SUM,FP,typ=6.):
     '''
     takes the afinity based on the FP score (which is just .5?)
+    typ is a scaling factor that changes how much to weight the priors
     '''
-    if typ==0:
-        try: w=math.log(9)/(FP-SUM)
-        except: w=math.log(9)/0.1
-        b=math.exp(w*SUM)
-    else: #default to this
-        try: w=math.log(6.)/(FP-SUM)
-        except: w=math.log(6.)/0.1
-        b=4*math.exp(w*SUM)
+#    if typ==0:
+#        try: w=math.log(9)/(FP-SUM)
+#        except: w=math.log(9)/0.1
+#        b=math.exp(w*SUM)
+#    else: #default to this
+    if typ<=1.0:
+        typ=1.000001
+    try: w=math.log(typ)/(FP-SUM)
+    except: w=math.log(typ)/0.1
+    #SJCG: altered prob of being unbound to scale with the typ
+    ##scaling with length of scores penalizes lower probability sites
+    ##    b=math.log(10.0-typ)*math.exp(w*SUM)*len(scores)
+    #b=2*(10-typ)*math.exp(w*SUM) this looks pretty good, lowers total scores
+    b=2*typ*math.exp(w*SUM)
         #try: w=2*math.log(7/3.)/(FP-SUM)
         #except: w=2*math.log(7/3.)/0.1
         #b=7/3*math.exp(w*SUM)
     a=0
-    for x in scores: a+=math.exp(w*x)
-    A=a/(b+a)
+    for x in scores: a+=math.exp(w*x) #probability of being bound at any region
+    A=a/(b+a)#prob of being bound (a) / prob unbond (b) + prob bound (a)
     return A
 
 def reduce_fasta(fsa_dict,gene_file):
@@ -215,7 +226,7 @@ def main():
 
 #    parser.add_option('--logistic',dest='logistic',action='store_true',default=False,help='Set to true to scale multiple matches into a logistic curve')
     parser.add_option('--threads',dest='threads',type='string',default='4',help='Set number of threads if using logistic scoring')
-    
+    parser.add_option('--scale',dest='typ',type='string',default='6')
     (opts, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
@@ -236,7 +247,7 @@ def main():
         fsa_dict=reduce_fasta(fsa_dict,opts.gene_file)
 
 
-    motif_matrix(fsa_dict,motiffile,opts.outfile,opts.genome,opts.ids,opts.pkl,int(opts.threads),typ=1)
+    motif_matrix(fsa_dict,motiffile,opts.outfile,opts.genome,opts.ids,opts.pkl,int(opts.threads),typ=float(opts.typ))
 
 if __name__=='__main__':
     main()

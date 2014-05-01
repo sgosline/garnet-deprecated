@@ -74,7 +74,7 @@ def motifScanning(tamo_file,fastafile,numthreads,genome,closest_gene_file=''):
         return motif_binding_out
 
 
-    scan_cmd='python '+os.path.join(progdir,'motif_fsa_scores.py')+' --motif='+tamo_file+' --genome='+genome+' --outfile='+motif_binding_out+' --genefile='+closest_gene_file+' --threads='+numthreads+' '+fastafile
+    scan_cmd='python '+os.path.join(progdir,'motif_fsa_scores.py')+' --motif='+tamo_file+' --genome='+genome+' --outfile='+motif_binding_out+' --genefile='+closest_gene_file+' --scale=10 --threads='+numthreads+' '+fastafile
     print scan_cmd
     print 'Output-----------------------------motifScanning------------------------------------------'
     print 'Scanning regions from '+fastafile+' using matrices from '+tamo_file+' and putting results in '+motif_binding_out
@@ -200,7 +200,7 @@ def main():
 #    if pklfile is not None and pklfile!='' and os.path.exists(binding_matrix):
 #            cmd='python '+os.path.join(progdir,'zipTgms.py')+' '+binding_matrix+' '+re.sub('.tgm','_tfids.txt',binding_matrix)+' '+re.sub('.tgm','_geneids.txt',binding_matrix)+' --pkl='+pklfile+' --tf-delimiter=. --genome='+genome
     if do_network is not None and do_network!='' and do_network!='False':
-        cmd='python '+os.path.join(progdir,'zipTgms.py')+' --pkl='+binding_matrix+' --as-network'
+        cmd='python '+os.path.join(progdir,'zipTgms.py')+' --pkl='+binding_matrix+' --genome '+genome+' --as-network'
         print cmd
         os.system(cmd)
 

@@ -9,7 +9,7 @@ import networkx
 from csv import DictReader
 
 progdir=os.path.dirname(sys.argv[0])
-def get_transcriptional_network_from_tgm(tgm,addmrna=True,score_thresh=0.1,expressed_prots=set()):
+def get_transcriptional_network_from_tgm(tgm,addmrna=True,score_thresh=0.1,expressed_genes=set(),tf_annotation=set()):
 
     # load in values from TGM
     scores=tgm['matrix']
@@ -20,13 +20,15 @@ def get_transcriptional_network_from_tgm(tgm,addmrna=True,score_thresh=0.1,expre
     # combine tf and their scores
     tf_scores = zip(tfs,scores)
 
+
+
     ##now initialize network
     transcription_graph = networkx.DiGraph()
     all_edge_weights=[] ##keep these for normalization
     ##remove this
     p300counts=0
     p300ids=['EP300','Ep300','icrogid:820620', 'icrogid:4116836','EP300_HUMAN']
-    print "Creating network digraph for "+str(len(tfs))+' matrices and '+str(len(gs))+' genes from '+str(len(expressed_prots))+' expressed proteins'
+    print "Creating network digraph for "+str(len(tfs))+' matrices and '+str(len(gs))+' genes from '+str(len(expressed_genes))+' expressed genes'
     count=0
     # Loop through and first expand tf set based on multiple tfs in the same family, ex: EGR1.EGR2
     for tfs,score in tf_scores:
@@ -43,11 +45,12 @@ def get_transcriptional_network_from_tgm(tgm,addmrna=True,score_thresh=0.1,expre
             if tf in p300ids or tf.upper() in p300ids:
                 p300counts+=1
                 continue
-            if len(expressed_prots)>0 and tf not in expressed_prots:
+            if len(tf_annotation)>0 and tf not in tf_annotation:
+            ##removed for now, dont want to filter TFs, want to include all
                 continue
             gscore=zip(gs,score)##zip each gene name to score vector
             for g,sc in gscore:
-                if len(expressed_prots)>0 and g not in expressed_prots:
+                if len(expressed_genes)>0 and g not in expressed_genes:
                     continue
                 if sc<=score_thresh:
                     continue
@@ -79,7 +82,7 @@ if __name__=='__main__':
     parser.add_option('--tf-delimiter',dest='delim',type='string',default='.',help='Delimiter used to separate TF names. DEFAULT: \'.\'')
     parser.add_option('--as-network',dest='as_network',action='store_true',default=False,help='Set this flag to save network as networkx object instead of matrix/names')
     parser.add_option('--genome',dest='genome',default='hg19',help='Genome build for species-specific filtering')
-    parser.add_option('--minscore',dest='minscore',default='0.01',type='string',help='If building networkX object, will remove edges with weight less than this value')
+    parser.add_option('--minscore',dest='minscore',default='0.3',type='string',help='If building networkX object, will remove edges with weight less than this value')
     opts,args=parser.parse_args()
 
     if len(args)!=3:
@@ -90,7 +93,7 @@ if __name__=='__main__':
             tfs=resfile['tfs']
             geneids=resfile['genes']
             tf_delimiter=resfile['delim']
-            fname=re.sub('pkl','network.pkl',opts.pkl)
+            fname=re.sub('pkl','thresh'+opts.minscore+'network.pkl',opts.pkl)
         else:
             print usage
             sys.exit('Need 3 arguments or pkl containing files in dictionary')
@@ -115,25 +118,26 @@ if __name__=='__main__':
 
     if opts.as_network: ##now create network DiGraph if desired
         #first filter by expressed proteins
-        prots={'mouse':set(),'human':set()}
+        prots={'mouse':set(),'human':set(),'mammal':set()}
         res=DictReader(open(progdir+'/../data/mouse-human-uniprot2014-1.tab','rU'),delimiter='\t')
         ##just add in all identifiers
         for row in res:
             spec=row['Organism']
             ps=set([row['Entry'],row['Entry name']])|set(row['Gene names'].split())
+            prots['mammal']|=set(ps)
             if spec=='Mus musculus (Mouse)':
                 prots['mouse']|=set(ps)
             else:
                 prots['human']|=set(ps)
 
         if opts.genome in ['hg19','hg18','hg17']:
-            spec_prots=prots['human']
+            spec='human'
         elif opts.genome in ['mm8','mm9','mm10']:
-            spec_prots=prots['mouse']
+            spec='mouse'
         
             ##now get species list of proteins
         spec_prot=[]
-        resfile=get_transcriptional_network_from_tgm(resfile,score_thresh=float(opts.minscore),expressed_prots=spec_prots)
+        resfile=get_transcriptional_network_from_tgm(resfile,score_thresh=float(opts.minscore),expressed_genes=prots[spec],tf_annotation=prots['human'])
 
     pickle.dump(resfile,open(fname,'w'))
     print 'Combined file saved to '+fname
