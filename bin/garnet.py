@@ -20,6 +20,7 @@ tamo_file=../data/matrix_files/vertebrates_clustered_motifs.tamo
 genome=hg19
 numthreads=4
 doNetwork=False
+tfDelimiter=.
 
 [expressionData]
 expressionFile=[name of expression file]
@@ -196,11 +197,14 @@ def main():
 
 #        pklfile=config.get('motifData','pkl')
     do_network=config.get('motifData','doNetwork')
+    delim=config.get('motifData','tfDelimiter')
+    if delim is None:
+        delim=''
     ##Step 4.5
 #    if pklfile is not None and pklfile!='' and os.path.exists(binding_matrix):
 #            cmd='python '+os.path.join(progdir,'zipTgms.py')+' '+binding_matrix+' '+re.sub('.tgm','_tfids.txt',binding_matrix)+' '+re.sub('.tgm','_geneids.txt',binding_matrix)+' --pkl='+pklfile+' --tf-delimiter=. --genome='+genome
     if do_network is not None and do_network!='' and do_network!='False':
-        cmd='python '+os.path.join(progdir,'zipTgms.py')+' --pkl='+binding_matrix+' --genome '+genome+' --as-network'
+        cmd='python '+os.path.join(progdir,'zipTgms.py')+' --pkl='+binding_matrix+' --genome '+genome+' --as-network --tf-delimiter='+delim
         print cmd
         os.system(cmd)
 

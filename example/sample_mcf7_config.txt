@@ -32,6 +32,7 @@ tamo_file=../../garnet/data/matrix_files/vertebrates_clustered_motifs.tamo
 genome=hg19
 numthreads=4
 doNetwork=False
+tfDelimiter=
 
 [expressionData]
 expressionFile=../../examples/inv_egf_vs_untreated_lfc.txt

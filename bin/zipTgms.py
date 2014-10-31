@@ -37,7 +37,7 @@ def get_transcriptional_network_from_tgm(tgm,addmrna=True,score_thresh=0.1,expre
             print 'Processed '+str(count)+' of '+str(len(tf_scores))+' TF motif clusters.'
             print '...tf network has '+str(transcription_graph.number_of_edges())+' edges'
         
-        if delim in tfs: # In the case of a multi-tf family, break them up
+        if delim!='' and delim in tfs: # In the case of a multi-tf family, break them up
             alltfs=tfs.split(delim)
         else:
             alltfs=[tfs]
@@ -79,7 +79,7 @@ if __name__=='__main__':
     usage='USAGE: python zipTgms.py [tgmfile] [tfids] [geneids]\nFile arguments can be left blank if --pkl option contains pickled dictionary containing files (from get_window_binding_matrix.py)'
     parser=OptionParser(usage=usage)
     parser.add_option('--pkl',dest='pkl',type='string',help='Name of pkl file to store combined object in, or name of existing pkl if using just network option.')
-    parser.add_option('--tf-delimiter',dest='delim',type='string',default='.',help='Delimiter used to separate TF names. DEFAULT: \'.\'')
+    parser.add_option('--tf-delimiter',dest='delim',type='string',default='.',help='Delimiter used to separate TF names. If left blank, will treat matrix as TF and create network with matris as node. DEFAULT: \'.\'')
     parser.add_option('--as-network',dest='as_network',action='store_true',default=False,help='Set this flag to save network as networkx object instead of matrix/names')
     parser.add_option('--genome',dest='genome',default='hg19',help='Genome build for species-specific filtering')
     parser.add_option('--minscore',dest='minscore',default='0.3',type='string',help='If building networkX object, will remove edges with weight less than this value')
