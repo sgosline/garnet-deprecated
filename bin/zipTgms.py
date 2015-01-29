@@ -38,15 +38,17 @@ def get_transcriptional_network_from_tgm(tgm,addmrna=True,score_thresh=0.1,expre
             print '...tf network has '+str(transcription_graph.number_of_edges())+' edges'
         
         if delim!='' and delim in tfs: # In the case of a multi-tf family, break them up
+#            print 'Splitting tfs by '+delim
             alltfs=tfs.split(delim)
         else:
+#            print 'Not splitting tfs: '+tfs
             alltfs=[tfs]
         for tf in alltfs:
             if tf in p300ids or tf.upper() in p300ids:
                 p300counts+=1
                 continue
             if len(tf_annotation)>0 and tf not in tf_annotation:
-            ##removed for now, dont want to filter TFs, want to include all
+                ##removed for now, dont want to filter TFs, want to include all
                 continue
             gscore=zip(gs,score)##zip each gene name to score vector
             for g,sc in gscore:
@@ -79,7 +81,7 @@ if __name__=='__main__':
     usage='USAGE: python zipTgms.py [tgmfile] [tfids] [geneids]\nFile arguments can be left blank if --pkl option contains pickled dictionary containing files (from get_window_binding_matrix.py)'
     parser=OptionParser(usage=usage)
     parser.add_option('--pkl',dest='pkl',type='string',help='Name of pkl file to store combined object in, or name of existing pkl if using just network option.')
-    parser.add_option('--tf-delimiter',dest='delim',type='string',default='.',help='Delimiter used to separate TF names. If left blank, will treat matrix as TF and create network with matris as node. DEFAULT: \'.\'')
+    parser.add_option('--tf-delimiter',dest='delim',type='string',help='Delimiter used to separate TF names. If left blank, will treat matrix as TF and create network with matris as node. DEFAULT: \'.\'')
     parser.add_option('--as-network',dest='as_network',action='store_true',default=False,help='Set this flag to save network as networkx object instead of matrix/names')
     parser.add_option('--genome',dest='genome',default='hg19',help='Genome build for species-specific filtering')
     parser.add_option('--minscore',dest='minscore',default='0.3',type='string',help='If building networkX object, will remove edges with weight less than this value')
@@ -93,6 +95,9 @@ if __name__=='__main__':
             tfs=resfile['tfs']
             geneids=resfile['genes']
             tf_delimiter=resfile['delim']
+            if opts.delim is not None:
+                tf_delimiter=opts.delim
+                print 'Over-riding existing delimiter ('+tf_delimiter+') with new one: '+opts.delim
             fname=re.sub('pkl','thresh'+opts.minscore+'network.pkl',opts.pkl)
         else:
             print usage
@@ -107,7 +112,10 @@ if __name__=='__main__':
         tfs=[a.strip() for a in open(tfids,'rU').readlines()]
         print 'Genes: '+geneids
         geneids=[a.strip() for a in open(geneids,'rU').readlines()]
-        tf_delimiter=opts.delim
+        if opts.delim is None:
+            tf_delimiter='.'
+        else:
+            tf_delimiter=opts.delim
 
         fname=opts.pkl
 
@@ -137,7 +145,10 @@ if __name__=='__main__':
         
             ##now get species list of proteins
         spec_prot=[]
-        resfile=get_transcriptional_network_from_tgm(resfile,score_thresh=float(opts.minscore),expressed_genes=prots[spec],tf_annotation=prots['human'])
+        if tf_delimiter!='':
+            spec_prot=prots['human']
+
+        resfile=get_transcriptional_network_from_tgm(resfile,score_thresh=float(opts.minscore),expressed_genes=prots[spec],tf_annotation=spec_prot)
 
     pickle.dump(resfile,open(fname,'w'))
     print 'Combined file saved to '+fname

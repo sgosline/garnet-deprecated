@@ -109,7 +109,8 @@ def fdr_correction(results):
     Compute FDR corrected p-values based on Benjamini-Hochberg procedure.
     '''
     new_results = []
-    num_tests = len(results)
+    num_tests = len([r for r in results if str(r[1])!='nan'])
+    print 'Correcting for '+str(num_tests)+' numeric values'
     for i in range(0,num_tests):
         tup = results[i]
         pval = tup[2]
@@ -142,7 +143,7 @@ def main():
                       help='Choose normalization type for response data. Choices are: "log2", "log10".\
                             Default is %default.')    
     parser.add_option('--use-qval',dest='use_qval',action='store_true',default=False,help='If set this the FOREST input file will contain -log(qval) instead of -log(pval). Default:%default')
-    parser.add_option('--qval-thresh',dest='thresh',type='string',default='0.1',help='Q-Value threshold to illustrate results. Default:%default')
+    parser.add_option('--qval-thresh',dest='thresh',type='string',default='0.9',help='Q-Value threshold to illustrate results. Default:%default')
     parser.add_option('--gifdir',dest='motifs',default=os.path.join(progdir,'../data/matrix_files/gifs'),
                       help='Directory containing motif GIFs to illustrate results. Default is %default')
 
@@ -254,9 +255,10 @@ def main():
     regdict={}
     for row in new_results:
         tfs=row[0].split(delim)
+	#print row
         if str(row[1])=='nan':
             continue    
-        if res[4]>float(opts.thresh):
+        if row[4]>float(opts.thresh):
             continue
         for tf in tfs:
             if row[2]==1:
